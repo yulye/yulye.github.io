@@ -4,18 +4,27 @@ import withFirebaseAuth from 'react-with-firebase-auth'
 import * as firebase from 'firebase/app';
 import 'firebase/auth';
 import firebaseConfig from './firebaseConfig';
+import UserForm from './UserForm';
 
 import logo from './logo.svg';
 import './App.css';
 
 const firebaseApp = firebase.initializeApp(firebaseConfig);
 
+const FormWrapper = ({ children }) =>
+  <React.Fragment>
+    {children}
+  </React.Fragment>;
+
 class App extends Component {
   render() {
     const {
       user,
+      error,
+      setError,
+      createUserWithEmailAndPassword,
+      signInWithEmailAndPassword,
       signOut,
-      signInWithGoogle,
     } = this.props;
 
     return (
@@ -28,15 +37,18 @@ class App extends Component {
 	  {
 	    user
 	    ? <p>Hello, {user.displayName}</p>
-	    : <p>Please sign in.</p>
+	    : ''
 	  }
 
 	  {
 	    user
-	    ? <button onClick={signOut}>Sign out</button>
-	    : <button onClick={signInWithGoogle}>
-	      Sign in with Google
-	    </button>
+	    ?
+	    <button onClick={signOut}>Sign out</button>
+	    :
+	    <FormWrapper>
+	      <UserForm
+		onSubmit={signInWithEmailAndPassword} />
+	    </FormWrapper>
 	  }
 	</header>
       </div>
