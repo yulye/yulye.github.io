@@ -4,47 +4,53 @@ import './index.css';
 //import App from './App';
 import * as serviceWorker from './serviceWorker';
 
-//let {log} = console
-
-function formatName(user) {
-  return user.firstName + ' ' + user.lastName;
+function formatDate(date) {
+  return 'date';
 }
 
-function getGreeting() {
-  if (user) {
-    return formatName(user);
-  }
-  return 'Stranger';
+function Avatar(props) {
+  return (
+    <img className="Avatar"
+      src={props.user.avatarUrl}
+      alt={props.user.name}
+    />
+  );
 }
 
-let user = {
-  firstName: 'Dwi',
-  lastName: 'Prabowo'
-};
-//user = false;
-
-let a;
-
-for(let i in "abc") {
-  a += i;
+function UserInfo(props) {
+  return (
+    <div className="UserInfo">
+      <Avatar user={props.user} />
+      <div className="UserInfo-name">
+	{props.user.name}
+      </div>
+    </div>
+  );
 }
 
-let types = [
-  1*undefined, 2*false, 2*true,
-  '----------------',
-  0, undefined, null, NaN, Infinity,
-  typeof undefined, typeof NaN,
-];
+function Comment(props) {
+  return (
+    <div className="Comment">
+      <UserInfo user={props.author} />
+      <div className="Comment-text">
+	{props.text}
+      </div>
+      <div className="Comment-date">
+	{formatDate(props.date)}
+      </div>
+    </div>
+  );
+}
 
-const el = <div>
-  <pre>{JSON.stringify(types)}</pre>
-  <pre>{a}</pre>
-  <h1>Hi, {getGreeting()}</h1>
-</div>;
+function Welcome(props) {
+  return <h1>Hi, {props.name}</h1>;
+}
 
+const el = <Welcome name="Sara" />;
 ReactDOM.render(el, document.getElementById('root'));
 
 // If you want your app to work offline and load faster, you can change
 // unregister() to register() below. Note this comes with some pitfalls.
 // Learn more about service workers: https://bit.ly/CRA-PWA
 serviceWorker.unregister();
+
