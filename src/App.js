@@ -1,74 +1,43 @@
-import React, { Component } from 'react';
-
+import React from 'react';
+import './App.css';
 import * as firebase from 'firebase/app';
 import 'firebase/auth';
-import withFirebaseAuth from 'react-with-firebase-auth'
-//import withFirebaseAuth from './withFirebaseAuth'
 import firebaseConfig from './firebaseConfig';
-import UserForm from './UserForm';
-
-import logo from './logo.svg';
-import './App.css';
+import SignIn from './SignIn';
+import Loading from './Loading';
+import User from './User';
 
 const firebaseApp = firebase.initializeApp(firebaseConfig);
+const firebaseAppAuth = firebaseApp.auth();
 
-const FormWrapper = ({ children }) =>
-  <React.Fragment>
-    {children}
-  </React.Fragment>;
+class App extends React.Component {
 
-class App extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      user: 0,
+    };
+  }
+
+  componentDidMount() {
+    firebaseAppAuth.onAuthStateChanged((user) => {
+      this.setState({user: user});
+    });
+  }
+
   render() {
-    const {
-      user,
-      error,
-      setError,
-      createUserWithEmailAndPassword,
-      signInWithEmailAndPassword,
-      signOut,
-    } = this.props;
-
-    return (
-      <div className="App">
-	<header className="App-header">
-	  <img
-	    src={logo}
-	    className="App-logo"
-	    alt="logo" />
-	  {
-	    user
-	    ? <p>Hello, {user.displayName}</p>
-	    : ''
-	  }
-
-	  {
-	    error ? alert(error) : ''
-	  }
-
-	  {
-	    user
-	    ?
-	    <button onClick={signOut}>Sign out</button>
-	    :
-	    <FormWrapper>
-	      <UserForm
-		onSubmit={signInWithEmailAndPassword} />
-	    </FormWrapper>
-	  }
-	</header>
-      </div>
-    );
+    const user = this.state.user;
+    if (user === 0) {
+      return <Loading/>;
+    } else if (user) {
+      return <User
+	user={user}
+	firebaseAppAuth={firebaseAppAuth}
+      />;
+    }
+    return <SignIn firebaseAppAuth={firebaseAppAuth}/>;
   }
 }
 
-const firebaseAppAuth = firebaseApp.auth();
-
-const providers = {
-  googleProvider: new firebase.auth.GoogleAuthProvider(),
-};
-
-export default withFirebaseAuth({
-  providers,
-  firebaseAppAuth,
-})(App);
+export default App;
 

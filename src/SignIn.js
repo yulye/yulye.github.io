@@ -1,42 +1,5 @@
 import React from 'react';
-import './App.css';
-import * as firebase from 'firebase/app';
-import 'firebase/auth';
-import firebaseConfig from './firebaseConfig';
-
-const firebaseApp = firebase.initializeApp(firebaseConfig);
-const firebaseAppAuth = firebaseApp.auth();
-
-function Loading() {
-  return <div className="loading">loading... please wait.</div>;
-}
-
-class User extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      signedOut: false,
-    };
-    this.handleSignOut = this.handleSignOut.bind(this);
-  }
-
-  handleSignOut(e) {
-    firebaseAppAuth.signOut();
-    this.setState({
-      signedOut: true,
-    });
-  }
-
-  render() {
-    return (
-      <div>
-	<div>Hi, {this.props.user.displayName}!</div>
-	<button onClick={this.handleSignOut}>Sign Out</button>
-	{this.state.signedOut && <Loading/>}
-      </div>
-    );
-  }
-}
+import Loading from './Loading';
 
 class SignIn extends React.Component {
   constructor(props) {
@@ -71,7 +34,7 @@ class SignIn extends React.Component {
     const email = this.state.email;
     const password = this.state.password;
     if (!this.state.signingIn)
-    firebaseAppAuth.signInWithEmailAndPassword(
+    this.props.firebaseAppAuth.signInWithEmailAndPassword(
       email, password
     ).catch((error) => {
       var errorCode = error.code;
@@ -101,7 +64,6 @@ class SignIn extends React.Component {
 	<input
 	  value={this.state.email}
 	  onChange={this.handleEmailChange}
-	  name="email"
 	  type="email"
 	  placeholder="email"
 	  autoFocus
@@ -110,7 +72,6 @@ class SignIn extends React.Component {
 	<input
 	  value={this.state.password}
 	  onChange={this.handlePasswordChange}
-	  name="password"
 	  type="password"
 	  placeholder="password"
 	  required
@@ -124,35 +85,5 @@ class SignIn extends React.Component {
   }
 }
 
-class App extends React.Component {
-
-  constructor(props) {
-    super(props);
-    this.state = {
-      user: 0,
-    };
-  }
-
-  componentDidMount() {
-    firebaseAppAuth.onAuthStateChanged((user) => {
-      this.setState({user: user});
-      console.log(user);
-    });
-  }
-
-  render() {
-    const user = this.state.user;
-    let view;
-    if (user === 0) {
-      view = <Loading/>;
-    } else if (user) {
-      view = <User user={user}/>;
-    } else {
-      view = <SignIn/>;
-    }
-    return view;
-  }
-}
-
-export default App;
+export default SignIn;
 
