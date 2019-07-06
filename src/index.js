@@ -4,6 +4,8 @@ import './index.css';
 //import App from './App';
 import * as serviceWorker from './serviceWorker';
 
+//let {log} = console
+
 function formatName(user) {
   return user.firstName + ' ' + user.lastName;
 }
@@ -19,9 +21,26 @@ let user = {
   firstName: 'Dwi',
   lastName: 'Prabowo'
 };
-user = false;
+//user = false;
 
-const el = <h1>Hi, {getGreeting()}</h1>;
+let a;
+
+for(let i in "abc") {
+  a += i;
+}
+
+let types = [
+  1*undefined, 2*false, 2*true,
+  '----------------',
+  0, undefined, null, NaN, Infinity,
+  typeof undefined, typeof NaN,
+];
+
+const el = <div>
+  <pre>{JSON.stringify(types)}</pre>
+  <pre>{a}</pre>
+  <h1>Hi, {getGreeting()}</h1>
+</div>;
 
 ReactDOM.render(el, document.getElementById('root'));
 
