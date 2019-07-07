@@ -1,5 +1,6 @@
 import React from 'react';
 import Loading from './Loading';
+import TicTacToe from './TicTacToe';
 
 class User extends React.Component {
   constructor(props) {
@@ -52,6 +53,8 @@ class User extends React.Component {
 	</div>
 	<button onClick={this.handleUpdateName}>Change</button>
 	<button onClick={this.handleSignOut}>Sign Out</button>
+	<hr/>
+	<TicTacToe/>
 	{this.state.signedOut && <Loading/>}
       </div>
     );
