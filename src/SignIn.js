@@ -7,12 +7,13 @@ class SignIn extends React.Component {
     this.state = {
       email: '',
       password: '',
-      waiting: false,
+      loading: false,
     };
     this.handleEmailChange = this.handleEmailChange.bind(this);
     this.handlePasswordChange = this.handlePasswordChange.bind(this);
     this.handleSignIn = this.handleSignIn.bind(this);
     this.handleSignUp = this.handleSignUp.bind(this);
+    this.handleResetPassword = this.handleResetPassword.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
   }
 
@@ -24,49 +25,49 @@ class SignIn extends React.Component {
     this.setState({password: e.target.value});
   }
 
-  catchError(error) {
-    if (error.code === 'auth/weak-password') {
-      alert('The password is too weak.');
-    } else if (error.code === 'auth/wrong-password') {
-      alert('Wrong password.');
-    } else {
-      alert(error.message);
-    }
-    console.log(error);
-  }
-
   handleSignIn(e) {
     const email = this.state.email;
     const password = this.state.password;
     if (email && password) this.handleSubmit(e);
   }
 
-  handleSignUp(e) {
+  catchError(error) {
+    alert(error.message);
+    console.log(error);
+    this.setState({loading: false});
+  }
+
+  firebaseAction(e, type) {
+    e.preventDefault();
+    if (this.state.loading) return;
+    const auth = this.props.firebaseAppAuth;
     const email = this.state.email;
     const password = this.state.password;
-    if (email && password && !this.state.waiting)
-    this.props.firebaseAppAuth.createUserWithEmailAndPassword(
-      email, password
-    ).catch(error => {
-      this.catchError(error);
-      this.setState({waiting: false});
-    });
-    this.setState({waiting: true});
-    e.preventDefault();
+    let action;
+    if (type === 'password-reset') {
+      action = auth.sendPasswordResetEmail(email).then(() => {
+	alert('Password reset email sent!');
+	this.setState({loading: false});
+      });
+    } else if (type === 'sign-up') {
+      action = auth.createUserWithEmailAndPassword(email, password);
+    } else if (type === 'sign-in') {
+      action = auth.signInWithEmailAndPassword(email, password);
+    }
+    action.catch(error => {this.catchError(error)});
+    this.setState({loading: true});
+  }
+
+  handleResetPassword(e) {
+    this.firebaseAction(e, 'password-reset');
+  }
+
+  handleSignUp(e) {
+    this.firebaseAction(e, 'sign-up');
   }
 
   handleSubmit(e) {
-    const email = this.state.email;
-    const password = this.state.password;
-    if (!this.state.waiting)
-    this.props.firebaseAppAuth.signInWithEmailAndPassword(
-      email, password
-    ).catch(error => {
-      this.catchError(error);
-      this.setState({waiting: false});
-    });
-    this.setState({waiting: true});
-    e.preventDefault();
+    this.firebaseAction(e, 'sign-in');
   }
 
   render() {
@@ -89,8 +90,8 @@ class SignIn extends React.Component {
 	/>
 	<button onClick={this.handleSignIn}>Sign In</button>
 	<button onClick={this.handleSignUp}>Sign Up</button>
-	<button>Reset Password</button>
-	{this.state.waiting && <Loading/>}
+	<button onClick={this.handleResetPassword}>Reset Password</button>
+	{this.state.loading && <Loading/>}
       </form>
     );
   }
