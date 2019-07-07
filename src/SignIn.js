@@ -7,12 +7,12 @@ class SignIn extends React.Component {
     this.state = {
       email: '',
       password: '',
-      signingIn: false,
-      wrongPassword: false,
+      waiting: false,
     };
     this.handleEmailChange = this.handleEmailChange.bind(this);
     this.handlePasswordChange = this.handlePasswordChange.bind(this);
     this.handleSignIn = this.handleSignIn.bind(this);
+    this.handleSignUp = this.handleSignUp.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
   }
 
@@ -24,37 +24,48 @@ class SignIn extends React.Component {
     this.setState({password: e.target.value});
   }
 
+  catchError(error) {
+    if (error.code === 'auth/weak-password') {
+      alert('The password is too weak.');
+    } else if (error.code === 'auth/wrong-password') {
+      alert('Wrong password.');
+    } else {
+      alert(error.message);
+    }
+    console.log(error);
+  }
+
   handleSignIn(e) {
     const email = this.state.email;
     const password = this.state.password;
     if (email && password) this.handleSubmit(e);
   }
 
+  handleSignUp(e) {
+    const email = this.state.email;
+    const password = this.state.password;
+    if (email && password && !this.state.waiting)
+    this.props.firebaseAppAuth.createUserWithEmailAndPassword(
+      email, password
+    ).catch(error => {
+      this.catchError(error);
+      this.setState({waiting: false});
+    });
+    this.setState({waiting: true});
+    e.preventDefault();
+  }
+
   handleSubmit(e) {
     const email = this.state.email;
     const password = this.state.password;
-    if (!this.state.signingIn)
+    if (!this.state.waiting)
     this.props.firebaseAppAuth.signInWithEmailAndPassword(
       email, password
-    ).catch((error) => {
-      var errorCode = error.code;
-      var errorMessage = error.message;
-      if (errorCode === 'auth/wrong-password') {
-	alert('Wrong password.');
-	this.setState({
-	  wrongPassword: true,
-	});
-      } else {
-	alert(errorMessage);
-      }
-      console.log(error);
-      this.setState({
-	signingIn: false,
-      });
+    ).catch(error => {
+      this.catchError(error);
+      this.setState({waiting: false});
     });
-    this.setState({
-      signingIn: true,
-    });
+    this.setState({waiting: true});
     e.preventDefault();
   }
 
@@ -77,9 +88,9 @@ class SignIn extends React.Component {
 	  required
 	/>
 	<button onClick={this.handleSignIn}>Sign In</button>
-	<button>Sign Up</button>
+	<button onClick={this.handleSignUp}>Sign Up</button>
 	<button>Reset Password</button>
-	{this.state.signingIn && <Loading/>}
+	{this.state.waiting && <Loading/>}
       </form>
     );
   }
